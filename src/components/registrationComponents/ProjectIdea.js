@@ -1,0 +1,311 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
+
+const ProjectIdea = ({ nextStep, prevStep }) => {
+  const navigate = useNavigate();
+  const [projectTitle, setProjectTitle] = useState("");
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [newTeamMember, setNewTeamMember] = useState('');
+  const [projectCategory, setProjectCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [cvFile, setCvFile] = useState(null);
+  const [proposalFile, setProposalFile] = useState(null);
+  const [letter, setLetter] = useState(null);
+  const [email, setEmail] = useState("");
+  const [institute, setInstitute] = useState("")
+
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+
+  const handleCVFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= MAX_FILE_SIZE) {
+      setCvFile(file);
+    } else {
+      toast.error('CV file size should not exceed 3MB');
+    }
+  };
+
+  const handleProposalFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= MAX_FILE_SIZE) {
+      setProposalFile(file);
+    } else {
+      toast.error('Proposal file size should not exceed 3MB');
+    }
+  };
+
+  const handleLetterFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= MAX_FILE_SIZE) {
+      setLetter(file);
+    } else {
+      toast.error('Letter file size should not exceed 3MB');
+    }
+  };
+
+  const handleAddTeamMember = () => {
+    if (newTeamMember.trim() !== '') {
+      setTeamMembers((prevMembers) => [...prevMembers, newTeamMember.trim()]);
+      setNewTeamMember('');
+    }
+  };
+
+  const handleRemoveTeamMember = (index) => {
+    setTeamMembers((prevMembers) => prevMembers.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("projectTitle", projectTitle);
+    formData.append("teamMembers", JSON.stringify(teamMembers));
+    formData.append("projectCategory", projectCategory);
+    formData.append("description", description);
+    formData.append("email", email);
+    formData.append("institute", institute);
+    if (cvFile) {
+      formData.append("cvFile", cvFile);
+    }
+    if (proposalFile) {
+      formData.append("proposalFile", proposalFile);
+    }
+    if (letter) {
+      formData.append("letter", letter);
+    }
+    try {
+      const response = await axios.put(
+        "http://localhost:5001/auth/submitProject",
+        formData
+      );
+      console.log(response);
+      if (response.data === 'titlepresent') {
+        toast.error('This project is already taken or done, please choose another topic.');
+        setTimeout(() => {
+          navigate('/');
+        }, 7000);
+      } else {
+        nextStep();
+      }
+    } catch (error) {
+      console.error("Error occurred during project submission: ", error);
+    }
+  };
+
+  return (
+    <div className="container mt-5">
+      <div className="card">
+        <div className="card-body">
+          <h1
+            style={{ backgroundColor: "orange", color: "white" }}
+            className="card-title text-white p-2 rounded text-center mb-4"
+          >
+            Project Idea Section
+          </h1>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label htmlFor="projectTitle" className="form-label">
+                Project Title*
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="projectTitle"
+                name="projectTitle"
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="teamMembers" className="form-label">
+                Team Members
+              </label>
+              {teamMembers.map((member, index) => (
+                <div key={index} className="d-flex align-items-center">
+                  <input
+                    type="text"
+                    className="form-control me-2"
+                    value={member}
+                    onChange={(e) => {
+                      const updatedMembers = [...teamMembers];
+                      updatedMembers[index] = e.target.value;
+                      setTeamMembers(updatedMembers);
+                    }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => handleRemoveTeamMember(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <div className="d-flex align-items-center">
+                <input
+                  type="text"
+                  className="form-control me-2"
+                  placeholder="Add a team member..."
+                  value={newTeamMember}
+                  onChange={(e) => setNewTeamMember(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleAddTeamMember}
+                  style = {{width: '87px'}}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="projectCategory" className="form-label">
+                Project Category*
+              </label>
+              <select
+                className="form-select"
+                id="projectCategory"
+                name="projectCategory"
+                value={projectCategory}
+                onChange={(e) => setProjectCategory(e.target.value)}
+                required
+              >
+                <option value="">Select a category</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Agriculture">Technology</option>
+                <option value="Industry">Industry</option>
+                <option value="Health">Health</option>
+                <option value="Construction">Construction</option>
+                <option value="Mines and Water">Mines and Water</option>
+                <option value="Information Communication">Information Communication</option>
+                <option value="Energy">Energy </option>
+                <option value="Enviroment and Protection">Environment and Protection </option>
+                <option value="Other related Sectors">Other related Sectors</option>
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="description" className="form-label">
+                Project Description*
+              </label>
+              <textarea
+                className="form-control"
+                id="description"
+                name="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows="5"
+                required
+              ></textarea>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">
+                Email Address*
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="mb-3">
+              <label htmlFor="institute" className="form-label">
+                Host Institution*
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="institute"
+                name="institute"
+                value={institute}
+                onChange={(e) => setInstitute(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="cvFile" className="form-label">
+                CV (PDF)*
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                className="form-control"
+                id="cvFile"
+                name="cvFile"
+                onChange={handleCVFileChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="proposalFile" className="form-label">
+                Concept Note (PDF)*
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                className="form-control"
+                id="proposalFile"
+                name="proposalFile"
+                onChange={handleProposalFileChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="letter" className="form-label">
+                Letter from Host Institutions*
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                className="form-control"
+                id="letter"
+                name="letter"
+                onChange={handleLetterFileChange}
+                required
+              />
+            </div>
+
+            <div className="d-flex justify-content-between">
+            <button
+            style={{ backgroundColor: "orange", color: "white", float: "left" }}
+            type="button"
+            className="btn me-2"
+            onClick={prevStep}
+          >
+            Previous
+          </button>
+          <button
+            style={{ backgroundColor: "orange", color: "white", float: "right" }}
+            type="submit"
+            className="btn"
+          >
+            Next
+          </button>
+
+            </div>
+          </form>
+        </div>
+      </div>
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default ProjectIdea;
