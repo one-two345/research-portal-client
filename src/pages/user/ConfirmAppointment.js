@@ -155,6 +155,7 @@ const ConfirmAppointment = () => {
             <td>{new Date(appointments[j].appointmentDate).toLocaleString().split(',')[0]}</td>
             <td>{new Date(appointments[j].appointmentDate).toLocaleString().split(',')[1]}</td>
             <td>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
               <button name={appointments[j].projectId + "-Accepted"} onClick={
                 function(e){
                 updateStatus(e.target.name);
@@ -164,7 +165,7 @@ const ConfirmAppointment = () => {
                 function(e){
                 rescheduleAppt(e.target.name);
               }} 
-                className='btn btn-primary'>Reschedule Appointment</button>
+                className='btn btn-primary'>Reschedule Appointment</button></div>
               </td>
               <td id={appointments[j].projectId + "-Input"} style={{display:"none"}}>
               <textarea name="" id={appointments[j].projectId + "-Message"} cols="30" rows="3" 

@@ -212,7 +212,25 @@ function ProjectFeedback() {
   const[loaded, setLoaded] = useState(false);
   const location = useLocation();
   const {user} = useAuthContext()
-  const email = user.email
+  let email;
+  const cookies = document.cookie;
+if (cookies) {
+    const emailCookie = cookies.split(';')[0];
+    if (emailCookie) {
+        const emailValue = emailCookie.split('=')[1];
+        if (emailValue) {
+             email = emailValue.replaceAll('"', '');
+            // Now you can use the email variable safely
+            console.log(email);
+        } else {
+            console.error("Email value is undefined");
+        }
+    } else {
+        console.error("Email cookie is undefined");
+    }
+} else {
+    console.error("No cookies found");
+}
  
 
   useEffect(

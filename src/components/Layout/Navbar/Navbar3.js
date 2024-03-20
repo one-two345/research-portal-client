@@ -59,6 +59,8 @@
 // export default Navbar;
 import React, {useState, useEffect} from "react";
 import axios from 'axios'
+import '../../../images/assets/css/admin.css';
+import { BsFillPersonFill } from "react-icons/bs";
 import { AppBar, Typography, Toolbar, Avatar, Button} from '@material-ui/core';
 import Stack from '@mui/material/Stack';
 
@@ -145,11 +147,10 @@ import useStyles from './styles';
     return (
     
         <AppBar
-            color="#11676d"
-           
+            style = {{backgroundColor: "#11676d",  color: "#FF8F00"}}             
             elevation={0}
             className= {classes.appBar}
-            style = {{backgroundColor: '#11676d'}}
+           
            
             
         >
@@ -168,7 +169,7 @@ import useStyles from './styles';
                             {/* {user.result.name && */}
                              
                               <>
-                              <Typography style ={{color: '#ffffff'}} variant="h6">{`Hi, ${userName}`}</Typography>
+                              <Typography  variant="h6"> <div className=" me-2" ><BsFillPersonFill  className='login-user-icon'/>{` Hi, ${userName}`}</div></Typography>
                               <Button variant="contained"  color="secondary" onClick={logout}>Logout</Button>
                               </>                                 
                             
